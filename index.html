@@ -475,8 +475,8 @@ const fluidColorGenerator = new RecursiveColorGenerator();
                     let text = window.currentGrammar
                         ? window.currentGrammar.flatten('#origin#')
                         : (generatedTexts[Math.floor(Math.random() * generatedTexts.length)] || '');
-                    // Convertir <br> en espacios y eliminar cualquier otro tag HTML
-                    text = text.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+                    // Convertir <br> a token de salto de línea, eliminar demás tags HTML
+                    text = text.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '').trim();
                     if (!text) return;
 
                     const fontSize   = Math.round(cluster.minSize + Math.random() * (cluster.maxSize - cluster.minSize));
@@ -486,20 +486,28 @@ const fluidColorGenerator = new RecursiveColorGenerator();
                     const startY     = fontSize + Math.random() * (canvas.height - fontSize * 3);
 
                     ctx.font = `${fontSize}px ${fontFamily}`;
-                    const words = text.split(/\s+/).filter(w => w.length > 0);
+                    // Partir respetando \n como salto explícito
+                    const tokens = text.split(/(\n)/).flatMap(part =>
+                        part === '\n' ? ['\n'] : part.split(/\s+/).filter(w => w.length > 0)
+                    );
                     let cx = startX;
                     let cy = startY;
 
-                    words.forEach(word => {
-                        const wordW = ctx.measureText(word + ' ').width;
+                    tokens.forEach(token => {
+                        if (token === '\n') {
+                            cx  = startX;
+                            cy += fontSize * 1.35;
+                            return;
+                        }
+                        const wordW = ctx.measureText(token + ' ').width;
                         if (cx + wordW > canvas.width - margin && cx > startX) {
                             cx  = startX;
                             cy += fontSize * 1.35;
                         }
-                        if (cy > canvas.height - 5) return; // fuera del canvas
+                        if (cy > canvas.height - 5) return;
 
                         textRevealQueue.push({
-                            word,
+                            word: token,
                             x: cx, y: cy,
                             fontSize,
                             fontFamily,
@@ -826,7 +834,7 @@ const fluidColorGenerator = new RecursiveColorGenerator();
         this.params = {};
         Object.assign(this.params, options);
         this.toDelete = false;
-        this.lifespan = 3320 + Math.random() * 400;
+        this.lifespan = 1400 + Math.random() * 600;
         this.age = 0;
         this.sizeChangeType = this.chooseSizeChangeType();
         this.sizeChangeSpeed = 0.5 + Math.random() * 1.5;
@@ -1392,12 +1400,26 @@ generateIrregularVertices() {
         this.y += this.change.y;
         this.change.x += this.arc.x * this.arcIntensity;
         this.change.y += this.arc.y * this.arcIntensity;
+        // Clamp velocidad para evitar acumulación infinita
+        this.change.x = Math.max(-6, Math.min(6, this.change.x));
+        this.change.y = Math.max(-6, Math.min(6, this.change.y));
+        // Wrap posición para que no escape el canvas
+        if (this.x > canvas.width  + this.width)  this.x = -this.width;
+        if (this.x < -this.width)                  this.x = canvas.width;
+        if (this.y > canvas.height + this.height)  this.y = -this.height;
+        if (this.y < -this.height)                 this.y = canvas.height;
 
         // Actualizar segundo trazo
         this.secondStroke.x += this.secondStroke.change.x;
         this.secondStroke.y += this.secondStroke.change.y;
         this.secondStroke.change.x += this.secondStroke.arc.x * this.arcIntensity;
         this.secondStroke.change.y += this.secondStroke.arc.y * this.arcIntensity;
+        this.secondStroke.change.x = Math.max(-6, Math.min(6, this.secondStroke.change.x));
+        this.secondStroke.change.y = Math.max(-6, Math.min(6, this.secondStroke.change.y));
+        if (this.secondStroke.x > canvas.width  + this.width)  this.secondStroke.x = -this.width;
+        if (this.secondStroke.x < -this.width)                  this.secondStroke.x = canvas.width;
+        if (this.secondStroke.y > canvas.height + this.height)  this.secondStroke.y = -this.height;
+        if (this.secondStroke.y < -this.height)                 this.secondStroke.y = canvas.height;
 
         // ✨ VARIACIÓN DINÁMICA DE ARCOS Y FORMAS
         if (Math.random() > 0.85) {
@@ -1448,9 +1470,10 @@ generateIrregularVertices() {
                 if (newY < 0) newY = canvas.height + newY;
                 if (newY >= canvas.height) newY = newY - canvas.height;
                 
-                // ✨ APLICAR EFECTOS ESPECÍFICOS SEGÚN LA FORMA
+                // ✨ APLICAR EFECTOS ESPECÍFICOS + COLOR FLUIDO EVOLUTIVO
                 this.applyShapeSpecificEffects(imageData, change);
-                
+                this.applyFluidColorEffects(imageData, change);
+
                 ctx.putImageData(imageData, newX, newY);
             }
         });
@@ -1643,13 +1666,13 @@ generateIrregularVertices() {
                 speed: 0.0003 + Math.random() * 0.7,
                 maxDistance: random(400) + 1200,
                 colorShift: {
-                    r: random(60) - 30,
-                    g: random(60) - 30,
-                    b: random(60) - 30
+                    r: random(140) - 70,
+                    g: random(140) - 70,
+                    b: random(140) - 70
                 }
             }));
         }
-        
+
         let distortions = [];
         let distortionCount = random(8) + 20;
         for (let i = 0; i < distortionCount; i++) {
@@ -1695,9 +1718,9 @@ generateIrregularVertices() {
                     speed: 0.0002 + Math.random() * 0.5,
                     maxDistance: random(400) + 1000,
                     colorShift: {
-                        r: random(80) - 40,
-                        g: random(80) - 40,
-                        b: random(80) - 40
+                        r: random(160) - 80,
+                        g: random(160) - 80,
+                        b: random(160) - 80
                     }
                 }));
             }
@@ -1747,7 +1770,7 @@ generateIrregularVertices() {
             frameCount++;
 
             // ── Estela suave: fade muy lento hacia negro (efecto "agua") ──
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.005)';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.002)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // ── Revelar varias palabras por tick ──
@@ -1785,8 +1808,8 @@ generateIrregularVertices() {
                 distortions = distortions.filter(d => !d.toDelete).slice(-80);
             }
 
-            // Limpieza periódica (~cada segundo a 50fps)
-            if (frameCount % 50 === 0) {
+            // Limpieza periódica (~cada 20 frames)
+            if (frameCount % 20 === 0) {
                 cleanupParticles();
                 maintainSystemHealth();
             }
