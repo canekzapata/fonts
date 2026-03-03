@@ -759,6 +759,23 @@ const fluidColorGenerator = new RecursiveColorGenerator();
 
             reset() {
                 Object.assign(this, this.params);
+                // Nueva vida: colores, dirección y arco frescos (no repetir mismo ciclo)
+                const intensity = 80 + Math.random() * 100;
+                this.colorShift = {
+                    r: (Math.random() - 0.5) * 2 * intensity,
+                    g: (Math.random() - 0.5) * 2 * intensity,
+                    b: (Math.random() - 0.5) * 2 * intensity,
+                };
+                this.direction = {
+                    x: (Math.random() - 0.5) * 1.8,
+                    y: (Math.random() - 0.5) * 1.8,
+                };
+                this.arc = {
+                    x: (Math.random() - 0.5) * 0.08,
+                    y: (Math.random() - 0.5) * 0.08,
+                };
+                // Escalonar la duración para romper la sincronización
+                this.maxDistance = 300 + Math.floor(Math.random() * 3000);
                 this.done = false;
                 this.distance = 0;
                 this.trail = [];
@@ -832,10 +849,30 @@ const fluidColorGenerator = new RecursiveColorGenerator();
                 this.direction.x += this.arc.x;
                 this.direction.y += this.arc.y;
 
-                // Reducir la frecuencia de cambios aleatorios
+                // Deriva aleatoria ocasional
                 if (Math.random() > 0.78) {
                     this.direction.x += (Math.random() - 0.5) * 0.5;
                     this.direction.y += (Math.random() - 0.5) * 0.5;
+                }
+
+                // Clamp de velocidad: nunca dejar que la partícula escape del canvas
+                this.direction.x = Math.max(-2.5, Math.min(2.5, this.direction.x));
+                this.direction.y = Math.max(-2.5, Math.min(2.5, this.direction.y));
+
+                // Borde suave: fuerza centrípeta débil al acercarse a los bordes
+                const edgeM = 60;
+                if (this.x < edgeM)                              this.direction.x += 0.06;
+                if (this.x > canvas.width  - edgeM - this.width) this.direction.x -= 0.06;
+                if (this.y < edgeM)                              this.direction.y += 0.06;
+                if (this.y > canvas.height - edgeM - this.height) this.direction.y -= 0.06;
+
+                // ColorShift evolutivo: se intensifica progresivamente durante la vida
+                if (Math.random() > 0.95) {
+                    const ageFactor = Math.min(1, this.distance / (this.maxDistance || 1200));
+                    const drift = (Math.random() - 0.35) * 14 * (1 + ageFactor);
+                    this.colorShift.r = Math.max(-180, Math.min(180, this.colorShift.r + drift));
+                    this.colorShift.g = Math.max(-180, Math.min(180, this.colorShift.g + drift));
+                    this.colorShift.b = Math.max(-180, Math.min(180, this.colorShift.b + drift));
                 }
 
                 this.distance++;
@@ -1683,11 +1720,11 @@ generateIrregularVertices() {
                     y: (random(3) - 1) * 0.05
                 },
                 speed: 0.0003 + Math.random() * 0.7,
-                maxDistance: random(400) + 1200,
+                maxDistance: 300 + Math.floor(Math.random() * 3000),
                 colorShift: {
-                    r: random(140) - 70,
-                    g: random(140) - 70,
-                    b: random(140) - 70
+                    r: random(180) - 90,
+                    g: random(180) - 90,
+                    b: random(180) - 90
                 }
             }));
         }
@@ -1735,11 +1772,11 @@ generateIrregularVertices() {
                         y: (random(3) - 1) * 0.08
                     },
                     speed: 0.0002 + Math.random() * 0.5,
-                    maxDistance: random(400) + 1000,
+                    maxDistance: 300 + Math.floor(Math.random() * 3000),
                     colorShift: {
-                        r: random(160) - 80,
-                        g: random(160) - 80,
-                        b: random(160) - 80
+                        r: random(180) - 90,
+                        g: random(180) - 90,
+                        b: random(180) - 90
                     }
                 }));
             }
