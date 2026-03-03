@@ -464,26 +464,45 @@ const fluidColorGenerator = new RecursiveColorGenerator();
 
             // Clusters: [número de instancias, tamaño mín px, tamaño máx px]
             const clusters = [
-                { count: 4, minSize: 90, maxSize: 150 }, // grandes
-                { count: 6, minSize: 30, maxSize: 65  }, // medianos
-                { count: 9, minSize: 10, maxSize: 26  }, // pequeños / densos
+                { count: 1, minSize: 180, maxSize: 280 }, // gigante
+                { count: 3, minSize: 80,  maxSize: 155 }, // grandes
+                { count: 5, minSize: 28,  maxSize: 68  }, // medianos
+                { count: 8, minSize: 9,   maxSize: 26  }, // pequeños
+                { count: 4, minSize: 5,   maxSize: 9   }, // micro
             ];
 
+            // Índice global de instancias para distribuir en zonas del canvas
+            let instanceIndex = 0;
+            const totalInstances = clusters.reduce((s, c) => s + c.count, 0);
+
             clusters.forEach(cluster => {
-                for (let c = 0; c < cluster.count; c++) {
+                for (let c = 0; c < cluster.count; c++, instanceIndex++) {
                     // Obtener texto: preferir grammar global, caer en generatedTexts
                     let text = window.currentGrammar
                         ? window.currentGrammar.flatten('#origin#')
                         : (generatedTexts[Math.floor(Math.random() * generatedTexts.length)] || '');
-                    // Convertir <br> a token de salto de línea, eliminar demás tags HTML
+                    // Convertir <br> a salto de línea, eliminar demás tags HTML
                     text = text.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '').trim();
-                    if (!text) return;
+                    if (!text) continue;
 
                     const fontSize   = Math.round(cluster.minSize + Math.random() * (cluster.maxSize - cluster.minSize));
                     const fontFamily = getRandomFont();
-                    const margin     = 30;
-                    const startX     = margin + Math.random() * (canvas.width  - margin * 2 - 150);
-                    const startY     = fontSize + Math.random() * (canvas.height - fontSize * 3);
+
+                    // Posicionamiento por zona: dividir canvas en cuadrícula 4×4
+                    // y asignar cada instancia a una celda diferente con jitter
+                    const gridCols = 4, gridRows = 4;
+                    const cellW = canvas.width  / gridCols;
+                    const cellH = canvas.height / gridRows;
+                    const cellIdx = instanceIndex % (gridCols * gridRows);
+                    const gridCol = cellIdx % gridCols;
+                    const gridRow = Math.floor(cellIdx / gridCols);
+                    // Jitter dentro de la celda (con ligero sangrado fuera del canvas)
+                    const jitterX = (Math.random() - 0.1) * cellW;
+                    const jitterY = (Math.random() * 0.7 + 0.1) * cellH;
+                    const startX  = gridCol * cellW + jitterX;
+                    const startY  = gridRow * cellH + jitterY + fontSize;
+                    // Margen dinámico: pequeño para textos grandes (que salen del canvas a propósito)
+                    const rightLimit = canvas.width - Math.max(5, 40 - fontSize * 0.1);
 
                     ctx.font = `${fontSize}px ${fontFamily}`;
                     // Partir respetando \n como salto explícito
@@ -500,11 +519,11 @@ const fluidColorGenerator = new RecursiveColorGenerator();
                             return;
                         }
                         const wordW = ctx.measureText(token + ' ').width;
-                        if (cx + wordW > canvas.width - margin && cx > startX) {
+                        if (cx + wordW > rightLimit && cx > startX) {
                             cx  = startX;
                             cy += fontSize * 1.35;
                         }
-                        if (cy > canvas.height - 5) return;
+                        if (cy > canvas.height + fontSize) return; // solo cortar si muy afuera
 
                         textRevealQueue.push({
                             word: token,
