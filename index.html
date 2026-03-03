@@ -890,7 +890,7 @@ const fluidColorGenerator = new RecursiveColorGenerator();
         this.params = {};
         Object.assign(this.params, options);
         this.toDelete = false;
-        this.lifespan = 1400 + Math.random() * 600;
+        this.lifespan = 500 + Math.random() * 2500;
         this.age = 0;
         this.sizeChangeType = this.chooseSizeChangeType();
         this.sizeChangeSpeed = 0.5 + Math.random() * 1.5;
@@ -1355,38 +1355,49 @@ generateIrregularVertices() {
     }
 
     reset() {
-        Object.assign(this, this.params);
-        this.x = random(canvas.width);
-        this.y = random(canvas.height);
         this.toDelete = false;
         this.age = 0;
-        
-        // Regenerar forma aleatoria
-        this.geometryType = this.geometryTypes[Math.floor(Math.random() * this.geometryTypes.length)];
-        this.shapeParameters = this.generateShapeParameters();
-        
-        // Resetear propiedades de arcos
+        // Nueva duración amplia para romper sincronización entre distorsiones
+        this.lifespan = 500 + Math.random() * 2500;
+
+        // Nueva posición y tamaño
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.width = Math.random() * 150 + 50;
+        this.height = Math.random() * 150 + 50;
+        this.originalWidth = this.width;
+        this.originalHeight = this.height;
+
+        // Nueva velocidad continua (no solo 3 valores discretos)
+        this.change = {
+            x: (Math.random() - 0.5) * 5,
+            y: (Math.random() - 0.5) * 5,
+        };
         this.arc = {
             x: (Math.random() - 0.5) * 0.15,
-            y: (Math.random() - 0.5) * 0.15
+            y: (Math.random() - 0.5) * 0.15,
         };
-        
         this.secondStroke = {
             x: this.x + (Math.random() - 0.5) * 100,
             y: this.y + (Math.random() - 0.5) * 100,
             change: {
                 x: this.change.x + (Math.random() - 0.5) * 0.8,
-                y: this.change.y + (Math.random() - 0.5) * 0.8
+                y: this.change.y + (Math.random() - 0.5) * 0.8,
             },
             arc: {
-                x: (Math.random() - 0.9) * 0.12,
-                y: (Math.random() - 0.9) * 0.12
-            }
+                x: (Math.random() - 0.5) * 0.12,
+                y: (Math.random() - 0.5) * 0.12,
+            },
         };
-        
-        this.arcIntensity = 0.8 + Math.random() * 0.4;
+        this.arcIntensity = 0.3 + Math.random() * 0.4;
         this.arcFrequency = 0.02 + Math.random() * 0.05;
-        
+        this.sizeChangeType = this.chooseSizeChangeType();
+        this.sizeChangeSpeed = 0.5 + Math.random() * 1.5;
+        this.sizeChangeIntensity = 0.1 + Math.random() * 0.4;
+        this.geometryType = this.geometryTypes[Math.floor(Math.random() * this.geometryTypes.length)];
+        this.shapeParameters = this.generateShapeParameters();
+        this.fluidColorSeed = Math.random() * 360;
+        this.colorEvolutionSpeed = 0.01 + Math.random() * 0.02;
     }
 
     applyFluidColorEffects(imageData, change) {
@@ -1429,7 +1440,7 @@ generateIrregularVertices() {
         
         this.age++;
         if (this.age > this.lifespan) {
-            this.toDelete = true;
+            this.reset();
             return;
         }
 
@@ -1738,11 +1749,12 @@ generateIrregularVertices() {
                 width: random(150) + 50,
                 height: random(150) + 50,
                 change: {
-                    x: (random(3) - 1) * 2.5,
-                    y: (random(3) - 1) * 2.5
+                    x: (Math.random() - 0.5) * 5,
+                    y: (Math.random() - 0.5) * 5,
                 }
             });
-            
+            // Escalonar las edades para que no arranquen todas en frame 0
+            distortion.age = Math.floor(Math.random() * distortion.lifespan * 0.7);
             distortions.push(distortion);
         }
 
@@ -1793,14 +1805,19 @@ generateIrregularVertices() {
             width: random(120) + 40,
             height: random(120) + 40,
             change: {
-                x: (random(3) - 1) * 3,
-                y: (random(3) - 1) * 3
+                x: (Math.random() - 0.5) * 5,
+                y: (Math.random() - 0.5) * 5,
             }
         });
         
         distortions.push(distortion);
     }
 }
+
+        // Reiniciar todas las distorsiones activas en sincronía con el texto nuevo
+        function refreshDistortions() {
+            distortions.forEach(d => { if (!d.toDelete) d.reset(); });
+        }
 
     // Función para verificar y mantener ambos sistemas activos
         function maintainSystemHealth() {
@@ -1840,6 +1857,7 @@ generateIrregularVertices() {
             if (Date.now() - lastTextRedraw > nextRedrawTime) {
                 buildTextRevealQueue();
                 regenerateParticles();
+                refreshDistortions(); // sincronizar distorsiones con el nuevo texto
                 lastTextRedraw = Date.now();
                 if (Math.random() < 0.5) renewMovementRules();
                 nextRedrawTime = (7 + Math.random() * 7) * 1000;
