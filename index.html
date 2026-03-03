@@ -108,12 +108,8 @@ Each minted piece is one among millions of possible variants: while it retains c
         generatedTexts = [singleText, singleText, singleText, singleText];
       }
 
-      console.log('✅ Textos leídos de Tracery:', generatedTexts);
       traceryTextReady = true;
-
-      // Solo arrancar el canvas si no se ha iniciado
       if (!canvasAnimationStarted && generatedTexts.length > 0) {
-        console.log('🚀 Iniciando animación del canvas...');
         startCanvasAnimation();
       }
 
@@ -123,17 +119,13 @@ Each minted piece is one among millions of possible variants: while it retains c
   }
 
   // Función para iniciar la animación del canvas
-function startCanvasAnimation() {
-  if (canvasAnimationStarted) return;
-  canvasAnimationStarted = true;
-
-  // ← aquí vuelves a poner la seed al principio de la secuencia
-setSeed(seed);
-
-  console.log('🎨 Canvas iniciado con texto de Tracery');
-  if (typeof drawColoredText === 'function') drawColoredText();
-  if (typeof animate === 'function') animate();
-}
+  function startCanvasAnimation() {
+    if (canvasAnimationStarted) return;
+    canvasAnimationStarted = true;
+    setSeed(seed);
+    if (typeof buildTextRevealQueue === 'function') buildTextRevealQueue();
+    if (typeof animate === 'function') animate();
+  }
 
   // Observador de mutaciones en #output
   const outputObserver = new MutationObserver((mutations) => {
@@ -145,7 +137,6 @@ setSeed(seed);
       }
     });
     if (hasTextualChanges) {
-      console.log('🔍 Detectado cambio en #output, leyendo texto...');
       readTraceryOutput();
       setTimeout(readTraceryOutput, 90000);
     }
@@ -155,7 +146,6 @@ setSeed(seed);
   function checkForInitialContent() {
     const outputDiv = document.getElementById('output');
     if (outputDiv && outputDiv.innerHTML.trim() !== '') {
-      console.log('📝 Contenido inicial encontrado en #output');
       readTraceryOutput();
       return true;
     }
@@ -164,7 +154,6 @@ setSeed(seed);
 
   // Al cargar el DOM, configuramos el observador y comprobaciones
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('📋 DOM cargado, configurando observadores...');
     const outputDiv = document.getElementById('output');
     if (outputDiv) {
       outputObserver.observe(outputDiv, {
@@ -179,33 +168,6 @@ setSeed(seed);
     }
   });
 
-  // Overrides de jQuery para interceptar .append() y .html() en #output
-  $(document).ready(function() {
-    setTimeout(() => {
-      console.log('🔗 jQuery listo, verificando contenido de Tracery...');
-      checkForInitialContent();
-
-      const originalAppend = $.fn.append;
-      $.fn.append = function() {
-        const res = originalAppend.apply(this, arguments);
-        if (this.is('#output')) {
-          console.log('📝 Detectado append en #output');
-          setTimeout(readTraceryOutput, 440);
-        }
-        return res;
-      };
-
-      const originalHtml = $.fn.html;
-      $.fn.html = function() {
-        const res = originalHtml.apply(this, arguments);
-        if (arguments.length > 0 && this.is('#output')) {
-          console.log('📝 Detectado html() en #output');
-          setTimeout(readTraceryOutput, 440);
-        }
-        return res;
-      };
-    }, 10000);
-  });
 
   // Respaldo agresivo al inicio
   let initialCheckCount = 0;
@@ -216,7 +178,6 @@ setSeed(seed);
     } else if (initialCheckCount > 10) {
       clearInterval(initialChecker);
       if (!canvasAnimationStarted) {
-        console.log('⚠️ Iniciando canvas sin texto de Tracery (timeout)');
         generatedTexts = ["Esperando texto de Tracery..."];
         startCanvasAnimation();
       }
@@ -244,11 +205,6 @@ setSeed(seed);
             return (usePound ? "#" : "") + (b | (g << 8) | (r << 16)).toString(16);
         }
 
-        // Función random
-        function random(max) {
-  return Math.floor(Math.random() * max);
-}
-        
         // Función para generar colores contrastantes
 function generateFluidContrastingColors() {
     // Usar el generador recursivo
@@ -321,7 +277,6 @@ function getFluidShadowColor(baseTextColor) {
         this.currentGeneration = 0;
         this.evolutionHistory = [[], [], []]; // Inicializar arrays vacíos
         
-        console.log('🎨 RecursiveColorGenerator inicializado con semillas:', this.colorSeeds);
     }
 
     generateRecursiveColor(depth = 0, baseIndex = null) {
@@ -379,7 +334,6 @@ function getFluidShadowColor(baseTextColor) {
             { h: Math.random() * 360, s: 60 + Math.random() * 40, l: 50 + Math.random() * 30 }
         ];
         this.evolutionHistory = [[], [], []];
-        console.log('🔄 Semillas de color reinicializadas');
     }
 
     // Generar color de sombra fluido basado en el color principal
@@ -450,7 +404,6 @@ function getFluidShadowColor(baseTextColor) {
         });
         
         this.currentGeneration++;
-        console.log(`🎨 Colores evolucionados - Generación ${this.currentGeneration}`);
     }
 
     // Generar paleta fluida completa
@@ -497,180 +450,90 @@ function getFluidShadowColor(baseTextColor) {
 const fluidColorGenerator = new RecursiveColorGenerator();
 
 
-        // Función mejorada para dibujar texto con colores por palabra/letra
-function drawColoredText() {
-    setSeed(seed);
-    
-    // Usar textos leídos del div #output de Tracery
-    const currentTexts = generatedTexts.length > 0 ? generatedTexts : ["Esperando texto de Tracery..."];
-    
-    // Evolucionar colores ocasionalmente (cada 10 llamadas aprox)
-    if (Math.random() > 0.9) {
-        fluidColorGenerator.evolveColorSeeds();
-    }
-    
-    // Generar nuevos colores fluidos y recursivos
-    const colors = generateFluidContrastingColors();
-    currentTextColor = colors.textColor;
-    currentBgColor = colors.bgColor;
-    currentShadowColor = colors.shadowColor;
-    
-    // Seleccionar fuente aleatoria y tamaño variable
-    const fontSize = 32 + Math.floor(Math.random() * 36);
-    const fontFamily = getRandomFont();
-    ctx.font = `${fontSize}px ${fontFamily}`;
-    
-    // Configuración para saltos de línea
-    let startY = 60;
-    let lineHeight = fontSize + 25;
-    let maxWidth = canvas.width - 60;
-    let baseX = 30 + Math.floor(Math.random() * 70);
-    let baseY = startY;
-    
-    console.log(`📝 Dibujando ${currentTexts.length} líneas con colores recursivos`);
-    
-    // Procesar cada línea del Tracery por separado
-    currentTexts.forEach((lineText, lineIndex) => {
-        console.log(`  Línea ${lineIndex + 1}: "${lineText}"`);
-        
-        let lineY = baseY + (lineIndex * lineHeight);
-        let lineX = baseX + (Math.random() - 0.5) * 80;
-        
-        // Asegurar que no se salga del canvas
-        if (lineX < 20) lineX = 20;
-        if (lineX > canvas.width - 300) lineX = canvas.width - 300;
-        if (lineY < fontSize + 10) lineY = fontSize + 10;
-        if (lineY > canvas.height - 50) {
-            baseX += 400;
-            baseY = startY;
-            lineY = baseY + (lineIndex * lineHeight);
-            lineX = baseX;
-        }
-        
-        // Procesar palabras dentro de cada línea
-        let words = lineText.split(' ');
-        let currentX = lineX;
-        let currentY = lineY;
-        
-        console.log(`    Posición línea: x=${lineX}, y=${lineY}`);
-        
-        words.forEach((word, wordIndex) => {
-            if (word.trim() === '') return;
-            
-            let wordWidth = ctx.measureText(word + ' ').width;
-            
-            // Salto de línea automático
-            if (currentX + wordWidth > canvas.width - 50 && currentX !== lineX) {
-                currentY += fontSize + 8;
-                currentX = lineX + 20;
-                
-                if (currentY > canvas.height - 40) {
-                    currentY = lineY;
-                    currentX += 300;
-                }
-            }
-            
-            // ✨ COLORES RECURSIVOS POR PALABRA
-            const wordTextColor = fluidColorGenerator.generateRecursiveColor(wordIndex % 3);
-            const wordBgColor = currentBgColor; // Mantener fondo consistente
-            const wordShadowColor = getFluidShadowColor(wordTextColor);
-            
-            // Fondo por palabra (mejorado con colores fluidos)
-            if (Math.random() < 0.25) {
-                if (Math.random() < 0.4) {
-                    // Fondo completo de palabra con color recursivo
-                    const bgVariation = fluidColorGenerator.generateRecursiveColor(1, 1);
-                    ctx.fillStyle = bgVariation;
-                    ctx.globalAlpha = 0.3 + Math.random() * 0.3; // Opacidad variable
-                    ctx.fillRect(currentX - 3, currentY - fontSize + 5, wordWidth, fontSize + 2);
-                    ctx.globalAlpha = 1;
-                } else {
-                    // Fondo de letras individuales
-                    const lettersToColor = Math.min(word.length, 1 + Math.floor(Math.random() * 4));
-                    const startLetter = Math.floor(Math.random() * Math.max(1, word.length - lettersToColor + 1));
-                    
-                    let letterX = currentX;
-                    for (let i = 0; i < word.length; i++) {
-                        const letterWidth = ctx.measureText(word[i]).width;
-                        
-                        if (i >= startLetter && i < startLetter + lettersToColor) {
-                            const letterBgColor = fluidColorGenerator.generateRecursiveColor(2, i % 3);
-                            ctx.fillStyle = letterBgColor;
-                            ctx.globalAlpha = 0.25 + Math.random() * 0.3;
-                            ctx.fillRect(letterX - 1, currentY - fontSize + 5, letterWidth + 2, fontSize + 2);
-                            ctx.globalAlpha = 1;
-                        }
-                        letterX += letterWidth;
-                    }
-                }
-            }
-            
-            // ✨ SOMBRA FLUIDA Y RECURSIVA
-            const useShadow = Math.random() > 0.7; // 30% probabilidad
-            
-            if (useShadow) {
-                // Offset más fluido y variado
-                const shadowOffsetX = (Math.random() - 0.5) * 3;
-                const shadowOffsetY = (Math.random() - 0.5) * 3;
-                const shadowIntensity = 0.3 + Math.random() * 0.4;
-                
-                ctx.fillStyle = wordShadowColor;
-                ctx.globalAlpha = shadowIntensity;
-                ctx.fillText(word, currentX + shadowOffsetX, currentY + shadowOffsetY);
-                ctx.globalAlpha = 1;
-                
-                // Ocasionalmente, doble sombra para efecto más dramático
-                if (Math.random() > 0.85) {
-                    const doubleShadowColor = getFluidShadowColor(wordShadowColor);
-                    ctx.fillStyle = doubleShadowColor;
-                    ctx.globalAlpha = 0.2;
-                    ctx.fillText(word, currentX + shadowOffsetX * 1.5, currentY + shadowOffsetY * 1.5);
-                    ctx.globalAlpha = 1;
-                }
-            }
-            
-            // ✨ DIBUJAR LA PALABRA CON COLOR RECURSIVO
-            ctx.fillStyle = wordTextColor;
-            ctx.fillText(word, currentX, currentY);
-            
-            // Ocasionalmente, efecto de "eco" con color ligeramente diferente
-            if (Math.random() > 0.92) {
-                const echoColor = fluidColorGenerator.generateRecursiveColor(3, wordIndex);
-                ctx.fillStyle = echoColor;
-                ctx.globalAlpha = 0.3;
-                ctx.fillText(word, currentX + 1, currentY + 1);
-                ctx.globalAlpha = 1;
-            }
-            
-            // Avanzar posición X
-            currentX += wordWidth;
-        });
-        
-        console.log(`    ✓ Línea ${lineIndex + 1} completada con colores recursivos`);
-    });
-    
-    console.log(`🎨 Texto dibujado con sistema de colores recursivos y fluidos`);
+        // ─── Sistema de reveal progresivo ("agua al río") ───────────────
+        let textRevealQueue = [];
+        let lastRevealTime  = 0;
+        const REVEAL_INTERVAL_MS = 90; // ~11 palabras/segundo
 
-    // Vaciar y volver a crear las partículas
-    particles = [];
-    for (let i = 0; i < 25; i++) {
-        particles.push(new SequencedTextParticle({
-            x: random(canvas.width),
-            y: random(canvas.height),
-            width: random(100) + 40,
-            height: random(100) + 40,
-            direction: { x: (random(3)-1)*0.8, y: (random(3)-1)*0.8 },
-            arc:       { x: (random(3)-1)*0.05, y: (random(3)-1)*0.05 },
-            speed: 0.3 + Math.random()*0.7,
-            maxDistance: random(340) + 120,
-            colorShift: {
-                r: random(60)-30,
-                g: random(60)-30,
-                b: random(60)-30
+        // Construye la cola de palabras para reveal: múltiples instancias
+        // del bot con distintos tamaños y posiciones mezcladas.
+        function buildTextRevealQueue() {
+            textRevealQueue = [];
+            fluidColorGenerator.evolveColorSeeds();
+
+            // Clusters: [número de instancias, tamaño mín px, tamaño máx px]
+            const clusters = [
+                { count: 2, minSize: 90, maxSize: 135 }, // grandes
+                { count: 3, minSize: 30, maxSize: 60  }, // medianos
+                { count: 5, minSize: 12, maxSize: 26  }, // pequeños / densos
+            ];
+
+            clusters.forEach(cluster => {
+                for (let c = 0; c < cluster.count; c++) {
+                    // Obtener texto: preferir grammar global, caer en generatedTexts
+                    let text = window.currentGrammar
+                        ? window.currentGrammar.flatten('#origin#')
+                        : (generatedTexts[Math.floor(Math.random() * generatedTexts.length)] || '');
+                    if (!text) return;
+
+                    const fontSize   = Math.round(cluster.minSize + Math.random() * (cluster.maxSize - cluster.minSize));
+                    const fontFamily = getRandomFont();
+                    const margin     = 30;
+                    const startX     = margin + Math.random() * (canvas.width  - margin * 2 - 150);
+                    const startY     = fontSize + Math.random() * (canvas.height - fontSize * 3);
+
+                    ctx.font = `${fontSize}px ${fontFamily}`;
+                    const words = text.split(/\s+/).filter(w => w.length > 0);
+                    let cx = startX;
+                    let cy = startY;
+
+                    words.forEach(word => {
+                        const wordW = ctx.measureText(word + ' ').width;
+                        if (cx + wordW > canvas.width - margin && cx > startX) {
+                            cx  = startX;
+                            cy += fontSize * 1.35;
+                        }
+                        if (cy > canvas.height - 5) return; // fuera del canvas
+
+                        textRevealQueue.push({
+                            word,
+                            x: cx, y: cy,
+                            fontSize,
+                            fontFamily,
+                            textColor: fluidColorGenerator.generateRecursiveColor(0),
+                        });
+                        cx += wordW;
+                    });
+                }
+            });
+
+            // Mezclar para intercalar tamaños grandes y pequeños
+            for (let i = textRevealQueue.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [textRevealQueue[i], textRevealQueue[j]] = [textRevealQueue[j], textRevealQueue[i]];
             }
-        }));
-    }
-}
+        }
+
+        // Dibuja la próxima palabra de la cola
+        function revealNextWord() {
+            if (textRevealQueue.length === 0) return;
+            const cell = textRevealQueue.shift();
+
+            ctx.font = `${cell.fontSize}px ${cell.fontFamily}`;
+
+            // Sombra opcional (30 %)
+            if (Math.random() > 0.7) {
+                const sc = getFluidShadowColor(cell.textColor);
+                ctx.fillStyle   = sc;
+                ctx.globalAlpha = 0.45;
+                ctx.fillText(cell.word, cell.x + (Math.random() - 0.5) * 3, cell.y + (Math.random() - 0.5) * 3);
+                ctx.globalAlpha = 1;
+            }
+
+            ctx.fillStyle = cell.textColor;
+            ctx.fillText(cell.word, cell.x, cell.y);
+        }
+
 
         
         // Sistema de detección de colisiones
@@ -738,7 +601,6 @@ function drawColoredText() {
         // Función para ejecutar el comportamiento de colisión
         function executeCollisionBehavior(behavior, particle1, particle2, particleIndex1, particleIndex2) {
           
-            console.log(`💥 Colisión: ${behavior} entre partículas ${particleIndex1} y ${particleIndex2}`);
             
             switch (behavior) {
                 case CollisionBehaviors.SURVIVE_BOTH:
@@ -1008,7 +870,6 @@ function drawColoredText() {
         this.arcIntensity = 0.3 + Math.random() * 0.4;
         this.arcFrequency = 0.02 + Math.random() * 0.05;
         
-        console.log(`🔺 Nueva distorsión: ${this.geometryType}`);
         this.shapeParameters = this.generateShapeParameters();
 
                 this.fluidColorSeed = Math.random() * 360;
@@ -1143,7 +1004,6 @@ changeSizeChangeType() {
     this.sizeChangeSpeed = 0.5 + Math.random() * 1.5;
     this.sizeChangeIntensity = 0.1 + Math.random() * 0.4;
     
-    console.log(`🔄 Distorsión cambió de ${oldType} a ${this.sizeChangeType}`);
     return this.sizeChangeType;
 }
 
@@ -1162,370 +1022,6 @@ generateIrregularVertices() {
     
     return vertices;
 }
-
-// 2. REEMPLAZAR TU FUNCIÓN drawStroke CON ESTA:
-drawIrregularStroke(x, y, width, height, change, arc) {
-    const regions = this.getCaptureRegion(x, y, width, height);
-    
-    regions.forEach(region => {
-        if (region.width > 0 && region.height > 0) {
-            let imageData = ctx.getImageData(region.x, region.y, region.width, region.height);
-            
-            let newX = region.x + change.x;
-            let newY = region.y + change.y;
-            
-            // Wrapping mejorado
-            if (newX < 0) newX = canvas.width + newX;
-            if (newX >= canvas.width) newX = newX - canvas.width;
-            if (newY < 0) newY = canvas.height + newY;
-            if (newY >= canvas.height) newY = newY - canvas.height;
-            
-            // Aplicar efectos específicos según la forma
-            this.applyShapeSpecificEffects(imageData, change);
-            
-            ctx.putImageData(imageData, newX, newY);
-        }
-    });
-}
-
-// 3. AÑADIR ESTAS FUNCIONES NUEVAS A TU CLASE:
-getCaptureRegion(x, y, width, height) {
-    switch (this.geometryType) {
-        case 'rectangle':
-            return this.getRectangleRegion(x, y, width, height);
-        case 'trapezoid':
-            return this.getTrapezoidRegion(x, y, width, height);
-        case 'parallelogram':
-            return this.getParallelogramRegion(x, y, width, height);
-        case 'rhombus':
-            return this.getRhombusRegion(x, y, width, height);
-        case 'irregular':
-            return this.getIrregularRegion(x, y, width, height);
-        case 'triangle':
-            return this.getTriangleRegion(x, y, width, height);
-        case 'pentagon':
-            return this.getPentagonRegion(x, y, width, height);
-        default:
-            return this.getRectangleRegion(x, y, width, height);
-    }
-}
-
-getRectangleRegion(x, y, width, height) {
-    return [{
-        x: Math.max(0, Math.min(x, canvas.width - width)),
-        y: Math.max(0, Math.min(y, canvas.height - height)),
-        width: Math.min(width, canvas.width - x),
-        height: Math.min(height, canvas.height - y)
-    }];
-}
-
-getTrapezoidRegion(x, y, width, height) {
-    const params = this.shapeParameters;
-    const topWidth = params.topWidth;
-    const bottomWidth = params.bottomWidth;
-    const skew = params.skew;
-    
-    const slices = 6;
-    const regions = [];
-    
-    for (let i = 0; i < slices; i++) {
-        const ratio = i / slices;
-        const sliceWidth = topWidth + (bottomWidth - topWidth) * ratio;
-        const sliceX = x + (width - sliceWidth) / 2 + skew * ratio * width;
-        const sliceY = y + (height / slices) * i;
-        const sliceHeight = height / slices;
-        
-        if (sliceX >= 0 && sliceY >= 0 && sliceX + sliceWidth <= canvas.width && sliceY + sliceHeight <= canvas.height) {
-            regions.push({
-                x: sliceX,
-                y: sliceY,
-                width: sliceWidth,
-                height: sliceHeight
-            });
-        }
-    }
-    
-    return regions;
-}
-
-getParallelogramRegion(x, y, width, height) {
-    const params = this.shapeParameters;
-    const skewX = params.skewX;
-    const skewY = params.skewY;
-    
-    const slices = 4;
-    const regions = [];
-    
-    for (let i = 0; i < slices; i++) {
-        const ratio = i / slices;
-        const sliceX = x + skewX * ratio * width;
-        const sliceY = y + skewY * ratio * height + (height / slices) * i;
-        const sliceWidth = width / slices;
-        const sliceHeight = height / slices;
-        
-        if (sliceX >= 0 && sliceY >= 0 && sliceX + sliceWidth <= canvas.width && sliceY + sliceHeight <= canvas.height) {
-            regions.push({
-                x: sliceX,
-                y: sliceY,
-                width: sliceWidth,
-                height: sliceHeight
-            });
-        }
-    }
-    
-    return regions;
-}
-
-getRhombusRegion(x, y, width, height) {
-    const params = this.shapeParameters;
-    const centerX = x + width / 2;
-    const centerY = y + height / 2;
-    
-    const rings = 4;
-    const regions = [];
-    
-    for (let ring = 0; ring < rings; ring++) {
-        const ratio = (ring + 1) / rings;
-        const ringWidth = width * ratio * 0.7;
-        const ringHeight = height * ratio * params.ratio;
-        
-        const ringX = centerX - ringWidth / 2;
-        const ringY = centerY - ringHeight / 2;
-        
-        if (ringX >= 0 && ringY >= 0 && ringX + ringWidth <= canvas.width && ringY + ringHeight <= canvas.height) {
-            regions.push({
-                x: ringX,
-                y: ringY,
-                width: ringWidth,
-                height: ringHeight
-            });
-        }
-    }
-    
-    return regions;
-}
-
-getTriangleRegion(x, y, width, height) {
-    const params = this.shapeParameters;
-    const regions = [];
-    const slices = 5;
-    
-    for (let i = 0; i < slices; i++) {
-        const ratio = i / slices;
-        let sliceWidth, sliceX;
-        
-        switch (params.type) {
-            case 0: // Equilátero
-                sliceWidth = width * (1 - ratio);
-                sliceX = x + (width - sliceWidth) / 2;
-                break;
-            case 1: // Isósceles
-                sliceWidth = width * (1 - ratio * 0.8);
-                sliceX = x + (width - sliceWidth) / 2;
-                break;
-            default: // Escaleno
-                sliceWidth = width * (1 - ratio * (0.6 + Math.random() * 0.4));
-                sliceX = x + (Math.random() - 0.3) * width * 0.3;
-                break;
-        }
-        
-        const sliceY = y + (height / slices) * i;
-        const sliceHeight = height / slices;
-        
-        if (sliceX >= 0 && sliceY >= 0 && sliceX + sliceWidth <= canvas.width && sliceY + sliceHeight <= canvas.height) {
-            regions.push({
-                x: sliceX,
-                y: sliceY,
-                width: sliceWidth,
-                height: sliceHeight
-            });
-        }
-    }
-    
-    return regions;
-}
-
-getIrregularRegion(x, y, width, height) {
-    const params = this.shapeParameters;
-    const vertices = params.vertices;
-    const centerX = x + width / 2;
-    const centerY = y + height / 2;
-    
-    const regions = [];
-    const gridSize = 6;
-    
-    for (let gx = 0; gx < gridSize; gx++) {
-        for (let gy = 0; gy < gridSize; gy++) {
-            const localX = (gx / gridSize - 0.5) * 2;
-            const localY = (gy / gridSize - 0.5) * 2;
-            
-            if (this.pointInIrregularShape(localX, localY, vertices)) {
-                const rectX = centerX + localX * width / 2;
-                const rectY = centerY + localY * height / 2;
-                const rectWidth = width / gridSize;
-                const rectHeight = height / gridSize;
-                
-                if (rectX >= 0 && rectY >= 0 && rectX + rectWidth <= canvas.width && rectY + rectHeight <= canvas.height) {
-                    regions.push({
-                        x: rectX,
-                        y: rectY,
-                        width: rectWidth,
-                        height: rectHeight
-                    });
-                }
-            }
-        }
-    }
-    
-    return regions;
-}
-
-getPentagonRegion(x, y, width, height) {
-    const params = this.shapeParameters;
-    const centerX = x + width / 2;
-    const centerY = y + height / 2;
-    const regions = [];
-    
-    const angles = 5;
-    for (let i = 0; i < angles; i++) {
-        const angle = (i / angles) * Math.PI * 2 + params.rotation;
-        const radius = (width + height) / 4;
-        const irregularity = params.irregularity;
-        
-        const radiusVariation = 1 + (Math.random() - 0.5) * irregularity;
-        const finalRadius = radius * radiusVariation;
-        
-        const pointX = centerX + Math.cos(angle) * finalRadius;
-        const pointY = centerY + Math.sin(angle) * finalRadius;
-        
-        const rectSize = Math.min(width, height) / 6;
-        const rectX = pointX - rectSize / 2;
-        const rectY = pointY - rectSize / 2;
-        
-        if (rectX >= 0 && rectY >= 0 && rectX + rectSize <= canvas.width && rectY + rectSize <= canvas.height) {
-            regions.push({
-                x: rectX,
-                y: rectY,
-                width: rectSize,
-                height: rectSize
-            });
-        }
-    }
-    
-    return regions;
-}
-
-pointInIrregularShape(x, y, vertices) {
-    let inside = false;
-    const n = vertices.length;
-    
-    for (let i = 0, j = n - 1; i < n; j = i++) {
-        const xi = vertices[i].x, yi = vertices[i].y;
-        const xj = vertices[j].x, yj = vertices[j].y;
-        
-        if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
-            inside = !inside;
-        }
-    }
-    
-    return inside;
-}
-
-// 4. AÑADIR EFECTOS ESPECÍFICOS POR FORMA:
-applyShapeSpecificEffects(imageData, change) {
-    const data = imageData.data;
-    
-    switch (this.geometryType) {
-        case 'trapezoid':
-            // Efecto de perspectiva
-            for (let i = 0; i < data.length; i += 4) {
-                if (Math.random() > 0.85) {
-                    const shift = Math.sin(this.age * 0.02) * 20;
-                    data[i] = Math.min(255, Math.max(0, data[i] + shift));
-                    data[i + 1] = Math.min(255, Math.max(0, data[i + 1] - shift/2));
-                    data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + shift/3));
-                }
-            }
-            break;
-            
-        case 'parallelogram':
-            // Efecto de deformación lateral
-            for (let i = 0; i < data.length; i += 4) {
-                if (Math.random() > 0.88) {
-                    const skew = Math.cos(this.age * 0.03) * 15;
-                    data[i] = Math.min(255, Math.max(0, data[i] + skew));
-                    data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + skew));
-                }
-            }
-            break;
-            
-        case 'rhombus':
-            // Efecto de rotación cromática
-            for (let i = 0; i < data.length; i += 4) {
-                if (Math.random() > 0.9) {
-                    const angle = this.age * 0.01;
-                    const r = data[i];
-                    const g = data[i + 1];
-                    const b = data[i + 2];
-                    
-                    data[i] = Math.min(255, Math.max(0, r * Math.cos(angle) - g * Math.sin(angle)));
-                    data[i + 1] = Math.min(255, Math.max(0, r * Math.sin(angle) + g * Math.cos(angle)));
-                    data[i + 2] = Math.min(255, Math.max(0, b + Math.sin(angle) * 10));
-                }
-            }
-            break;
-            
-        case 'irregular':
-            // Efecto caótico
-            for (let i = 0; i < data.length; i += 4) {
-                if (Math.random() > 0.82) {
-                    const chaos = (Math.random() - 0.5) * 40;
-                    data[i] = Math.min(255, Math.max(0, data[i] + chaos));
-                    data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + chaos * 0.7));
-                    data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + chaos * 1.3));
-                }
-            }
-            break;
-            
-        case 'triangle':
-            // Efecto angular
-            for (let i = 0; i < data.length; i += 4) {
-                if (Math.random() > 0.87) {
-                    const wave = Math.sin(this.age * 0.04 + i * 0.001) * 25;
-                    data[i] = Math.min(255, Math.max(0, data[i] + wave));
-                    data[i + 2] = Math.min(255, Math.max(0, data[i + 2] - wave));
-                }
-            }
-            break;
-            
-        case 'pentagon':
-            // Efecto pentagonal
-            for (let i = 0; i < data.length; i += 4) {
-                if (Math.random() > 0.86) {
-                    const penta = Math.sin(this.age * 0.05 * 5) * 20;
-                    data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + penta));
-                    data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + penta * 0.5));
-                }
-            }
-            break;
-            
-            default: // rectangle y cualquier otra forma
-                // ✨ LLAMAR AL NUEVO MÉTODO AQUÍ:
-                this.applyFluidColorEffects(imageData, change);
-                
-                // Efectos estándar mejorados
-                for (let i = 0; i < data.length; i += 4) {
-                    if (Math.random() > 0.88) {
-                        const fluidVariation = Math.sin(this.age * 0.03 + i * 0.0001) * 25;
-                        data[i] = Math.min(255, Math.max(0, data[i] + fluidVariation));
-                        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + fluidVariation * 0.8));
-                        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + fluidVariation * 1.2));
-                    }
-                }
-                break;
-        }
-}
-
 
     // ✨ OBTENER REGIÓN DE CAPTURA SEGÚN LA FORMA
     getCaptureRegion(x, y, width, height) {
@@ -1821,7 +1317,6 @@ applyShapeSpecificEffects(imageData, change) {
         this.arcIntensity = 0.8 + Math.random() * 0.4;
         this.arcFrequency = 0.02 + Math.random() * 0.05;
         
-        console.log(`🔄 Distorsión regenerada: ${this.geometryType}`);
     }
 
     applyFluidColorEffects(imageData, change) {
@@ -1910,7 +1405,6 @@ applyShapeSpecificEffects(imageData, change) {
             if (Math.random() > 0.95) {
                 this.geometryType = this.geometryTypes[Math.floor(Math.random() * this.geometryTypes.length)];
                 this.shapeParameters = this.generateShapeParameters();
-                console.log(`🔀 Forma cambiada a: ${this.geometryType}`);
             }
             
             if (Math.random() > 0.7) {
@@ -2077,64 +1571,45 @@ applyShapeSpecificEffects(imageData, change) {
             distortions = distortions.filter(d => !d.toDelete);
         }
 
-        // Función para renovar reglas de movimiento (menos drástica)
-function renewMovementRules() {
-    setSeed(seed);
-    console.log('🔄 Ajustando reglas de movimiento sutilmente');
-    
-    // Tu código existente para partículas...
-    particles.forEach(particle => {
-        if (!particle.toDelete && Math.random() > 0.6) {
-            particle.direction.x += (Math.random() - 0.5) * 0.5;
-            particle.direction.y += (Math.random() - 0.5) * 0.5;
-            particle.arc.x += (Math.random() - 0.7) * 0.505;
-            particle.arc.y += (Math.random() - 0.7) * 0.505;
-        }
-    });
-    
-    // NUEVO: También cambiar comportamientos de tamaño ocasionalmente
-    if (Math.random() > 0.6) { // 30% de probabilidad
-        changeSizeBehaviors();
-    }
-    
-    // Tu código existente para distorsiones...
-    distortions.forEach(distortion => {
-        if (!distortion.toDelete && Math.random() > 0.4) {
-            distortion.change.x += (Math.random() - 0.5) * 0.5;
-            distortion.change.y += (Math.random() - 0.5) * 0.5;
-        }
-    });
-    
-    // Tu código existente para crear nuevas distorsiones...
-    if (Math.random() > 0.85) {
-        const newDistortionCount = random(4) + 3;
-    for (let i = 0; i < newDistortionCount; i++) {
-        const distortion = new SequencedPixelDistortion({
-            x: random(canvas.width),
-            y: random(canvas.height),
-            width: random(80) + 30,    // Tamaños más pequeños
-            height: random(80) + 30,   // Tamaños más pequeños
-            change: {
-                x: (random(3) - 1) * 0.4,  // Movimiento más lento
-                y: (random(3) - 1) * 0.4
+        // Función para renovar reglas de movimiento
+        function renewMovementRules() {
+            particles.forEach(particle => {
+                if (!particle.toDelete && Math.random() > 0.6) {
+                    particle.direction.x += (Math.random() - 0.5) * 0.5;
+                    particle.direction.y += (Math.random() - 0.5) * 0.5;
+                    particle.arc.x += (Math.random() - 0.7) * 0.505;
+                    particle.arc.y += (Math.random() - 0.7) * 0.505;
+                }
+            });
+            if (Math.random() > 0.6) changeSizeBehaviors();
+            distortions.forEach(distortion => {
+                if (!distortion.toDelete && Math.random() > 0.4) {
+                    distortion.change.x += (Math.random() - 0.5) * 0.5;
+                    distortion.change.y += (Math.random() - 0.5) * 0.5;
+                }
+            });
+            if (Math.random() > 0.85) {
+                const count = random(4) + 3;
+                for (let i = 0; i < count; i++) {
+                    distortions.push(new SequencedPixelDistortion({
+                        x: random(canvas.width),
+                        y: random(canvas.height),
+                        width:  random(80) + 30,
+                        height: random(80) + 30,
+                        change: { x: (random(3) - 1) * 0.4, y: (random(3) - 1) * 0.4 }
+                    }));
+                }
             }
-        });
         }
-    }
-}
 
         function changeSizeBehaviors() {
-    distortions.forEach((distortion, index) => {
-        if (!distortion.toDelete && Math.random() < 0.8) { // 30% de distorsiones cambian
-            const oldType = distortion.sizeChangeType;
-            distortion.sizeChangeType = distortion.chooseSizeChangeType();
-            if (oldType !== distortion.sizeChangeType) {
-                console.log(`🔄 Distorsión #${index} cambió de ${oldType} a ${distortion.sizeChangeType}`);
-            }
+            distortions.forEach(distortion => {
+                if (!distortion.toDelete && Math.random() < 0.8) {
+                    distortion.sizeChangeType = distortion.chooseSizeChangeType();
+                }
+            });
         }
-    });
-}
-         setSeed(seed);
+        setSeed(seed);
         // Crear partículas y distorsiones iniciales con velocidades más lentas
         let particles = [];
         
@@ -2177,11 +1652,9 @@ function renewMovementRules() {
             });
             
             distortions.push(distortion);
-            console.log(`🎯 Distorsión inicial #${i} - Tipo: ${distortion.sizeChangeType}`);
         }
 
         // Variables de control con tiempo aleatorio
-        let useFirstSet = true;
         let lastTextRedraw = Date.now();
         let frameCount = 0;
         let nextRedrawTime = (5 + Math.random() * 7) * 1000; // Entre 15 y 35 segundos
@@ -2190,9 +1663,7 @@ function renewMovementRules() {
 
         // Función para regenerar partículas caóticas (más controlada)
         function regenerateParticles() {
-            setSeed(seed);
-            console.log('🔄 Agregando nuevas partículas caóticas');
-            const newParticleCount = 14 + random(45); // Entre 5-15 partículas
+            const newParticleCount = 14 + random(45);
             
             for (let i = 0; i < newParticleCount; i++) {
                 particles.push(new SequencedTextParticle({
@@ -2221,12 +1692,9 @@ function renewMovementRules() {
 
         // Función para regenerar distorsiones rectangulares
         function regenerateDistortions() {
-    setSeed(seed);
-    console.log('🔲 Agregando nuevas distorsiones rectangulares con tamaños dinámicos');
     const newDistortionCount = 7 + random(14); // Entre 8-20 distorsiones
-    
+
     for (let i = 0; i < newDistortionCount; i++) {
-        // Crear distorsión con comportamiento de tamaño aleatorio
         const distortion = new SequencedPixelDistortion({
             x: random(canvas.width),
             y: random(canvas.height),
@@ -2239,9 +1707,6 @@ function renewMovementRules() {
         });
         
         distortions.push(distortion);
-        
-        // Opcional: Log del tipo de comportamiento para debug
-        console.log(`📏 Nueva distorsión con comportamiento: ${distortion.sizeChangeType}`);
     }
 }
 
@@ -2252,43 +1717,40 @@ function renewMovementRules() {
             
             // Sistema 1: Partículas caóticas - mantener entre 15-30
             if (activeParticles < 25) {
-                console.log(`⚠️ Pocas partículas activas (${activeParticles}), agregando más...`);
                 regenerateParticles();
             }
             
             // Sistema 2: Distorsiones rectangulares - mantener entre 8-20
             if (activeDistortions < 18) {
-                console.log(`⚠️ Pocas distorsiones activas (${activeDistortions}), agregando más...`);
                 regenerateDistortions();
             }
         }
 
-        // Loop de animación principal con auto-regeneración
+        // Loop de animación principal
         function animate() {
-             setSeed(seed);
+            setSeed(seed);
             if (!canvasAnimationStarted) return;
-            
+
             requestAnimationFrame(animate);
             frameCount++;
 
-            // Redibujar texto en intervalos aleatorios
+            // ── Estela suave: fade muy lento hacia negro (efecto "agua") ──
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.005)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // ── Revelar la siguiente palabra de la cola ──
+            if (Date.now() - lastRevealTime > REVEAL_INTERVAL_MS) {
+                revealNextWord();
+                lastRevealTime = Date.now();
+            }
+
+            // Reconstruir cola en intervalos aleatorios (7-14 s)
             if (Date.now() - lastTextRedraw > nextRedrawTime) {
-                drawColoredText();
-                regenerateParticles(); 
+                buildTextRevealQueue();
+                regenerateParticles();
                 lastTextRedraw = Date.now();
-                
-                // 50% de probabilidad de ajustar sutilmente las reglas
-                if (Math.random() < 0.5) {
-                    renewMovementRules();
-                    setSeed(seed);
-                }
-                
-                // Calcular siguiente tiempo aleatorio (15-35 segundos)
-                setSeed(seed);
+                if (Math.random() < 0.5) renewMovementRules();
                 nextRedrawTime = (7 + Math.random() * 7) * 1000;
-                console.log(`⏰ Próximo redibujado en ${(nextRedrawTime/1000).toFixed(1)} segundos`);
-                
-                // Intentar leer nuevo texto del output de Tracery
                 readTraceryOutput();
             }
 
@@ -2298,55 +1760,37 @@ function renewMovementRules() {
                 lastCollisionCheck = Date.now();
             }
 
-            // SISTEMA 1: Dibujar partículas caóticas (SIEMPRE ACTIVO)
+            // Sistema 1: partículas caóticas
             particles.forEach(particle => particle.draw());
-
-            // Control dinámico del número de partículas caóticas
-            const activeParticleCount = particles.filter(p => !p.toDelete && !p.done).length;
-            
             if (particles.length > 120) {
-                // Eliminar exceso pero mantener los activos
                 particles = particles.filter(p => !p.toDelete).slice(-40);
             }
 
-            // SISTEMA 2: Dibujar distorsiones rectangulares
-            distortions.forEach(d => {
-                if (Math.random() > 0.4) { // 90% de probabilidad de dibujar
-                    d.draw();
-                }
-            });
-
-            // Control dinámico de distorsiones rectangulares
-            const activeDistortionCount = distortions.filter(d => !d.toDelete).length;
-            
+            // Sistema 2: distorsiones
+            distortions.forEach(d => { if (Math.random() > 0.4) d.draw(); });
             if (distortions.length > 30) {
-                // Limpiar exceso
                 distortions = distortions.filter(d => !d.toDelete).slice(-60);
             }
 
-            // Limpiar elementos marcados para eliminación
-            if (frameCount % 50 === 0) { // Cada segundo aproximadamente
+            // Limpieza periódica (~cada segundo a 50fps)
+            if (frameCount % 50 === 0) {
                 cleanupParticles();
-                maintainSystemHealth(); // Verificar salud de ambos sistemas
+                maintainSystemHealth();
             }
 
-            // Crear nuevas distorsiones rectangulares ocasionalmente
+            // Nueva distorsión esporádica
             if (Math.random() > 0.995) {
                 distortions.push(new SequencedPixelDistortion({
                     x: random(canvas.width),
                     y: random(canvas.height),
                     width: random(190) + 40,
                     height: random(190) + 40,
-                    change: {
-                        x: (random(3) - 1) * 1.5,
-                        y: (random(3) - 1) * 1.5
-                    }
+                    change: { x: (random(3) - 1) * 1.5, y: (random(3) - 1) * 1.5 }
                 }));
             }
 
-            // Regeneración suave cada 30 segundos
-            if (frameCount % 120 === 0) { // Cada 30 segundos aprox
-                console.log('🔄 Regeneración suave programada');
+            // Regeneración suave cada ~30 segundos a 60fps
+            if (frameCount % 1800 === 0) {
                 if (Math.random() < 0.5) regenerateParticles();
                 if (Math.random() < 0.5) regenerateDistortions();
             }
