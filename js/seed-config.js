@@ -1,7 +1,8 @@
-// Aquí pones tu semilla deseada:
-localStorage.setItem('pixelSequencerSeed','600087110'); // <-- tu semilla
+// Semilla aleatoria en cada carga de página
+localStorage.setItem('pixelSequencerSeed', Math.floor(Math.random() * 999999999999));
 
-
+// Para fijar una semilla específica, comenta la línea de arriba y descomenta la de abajo:
+// localStorage.setItem('pixelSequencerSeed', '600087110');
 
 
 // 31288  6  11  21 3  34  39 40 53  57    55556   4440 4444   4448    9991
@@ -9,7 +10,7 @@ localStorage.setItem('pixelSequencerSeed','600087110'); // <-- tu semilla
 // 9993   99995    99999!    10006   10009    4444      8880008882    8880008883
 //    8880008885     8880008888896 964  968 caballitos  913  919 de los mas bellos
 
-// 90011 extraterrestres cohetes astronautas   591 lineas  595 hexagrama 
+// 90011 extraterrestres cohetes astronautas   591 lineas  595 hexagrama
 
 //5915 extraterrestre  59123    6512 6516 egipt  6518 77773 egipt 777777
 
