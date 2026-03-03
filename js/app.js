@@ -26,7 +26,6 @@ function setSeed(n) {
   localStorage.setItem(STORAGE_KEY, seed);
   rng = mulberry32(seed);
   Math.random = rng;
-  console.log(`🔢 Semilla actualizada a ${seed}`);
 }
 
 // Inicializa PRNG inmediatamente
@@ -38,30 +37,18 @@ function random(max) {
 }
 // ──────────────────────────────────────────────────────────
 
-// Ahora tu app en sí:
-console.log("app");
-
 $(document).ready(function() {
 
-   function loadGrammar(name) {
-   $("#output").html("");
-      // Si quieres reproducir siempre la misma frase al recargar gramática,
-       // descomenta la siguiente línea:
-     // setSeed(seed);
-     // ¡Resiembramos justo aquí para que la expansión sea idéntica!
-     setSeed(seed);
+  function loadGrammar(name) {
+    $("#output").html("");
+    setSeed(seed);
 
-   var grammar = tracery.createGrammar(grammars[name]);
-   $("#grammar").html(grammar.toText());
-   for (var i = 0; i < 1; i++) {
-     var s = grammar.flatten("#origin#");
-      console.log(s);
-      var div = $("<div/>", {
-        class: "outputSample",
-        html: s
-      });
-      $("#output").append(div);
-    }
+    var grammar = tracery.createGrammar(grammars[name]);
+    window.currentGrammar = grammar; // exponer globalmente para múltiples expansiones
+    $("#grammar").html(grammar.toText());
+    var s = grammar.flatten("#origin#");
+    var div = $("<div/>", { class: "outputSample", html: s });
+    $("#output").append(div);
   }
 
   setTimeout(function() { loadGrammar("e"); }, 30);
