@@ -1,0 +1,438 @@
+@font-face {
+  font-family: Apercu;
+  src: url(./Apercu.otf);
+}
+@font-face {
+  font-family: Apercu;
+  src: url(./Apercu.otf);   font-display: fallback;
+}
+
+
+@font-face {
+  font-family: 'gnu';
+  src: url(../fonts/unifont.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'himalaya';
+  src: url(../fonts/bigger_himalaya.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansBrahmi-Regular';
+  src: url(../fonts/NotoSansBrahmi-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'penuture';
+  src: url(../fonts/PENUTURE.ttf);
+  font-display: fallback;
+}
+@font-face {
+  font-family: 'NotoSansAdlam-Regular';
+  src: url(../fonts/NotoSansAdlam-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: Everson;
+  src: url(../fonts/EversonMono.ttf);
+  font-display: fallback;
+}
+
+
+@font-face {
+  font-family: 'KurintoBook-Rg';
+  src: url(../fonts/KurintoBook-Rg.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'KurintoBookAux-Rg';
+  src: url(../fonts/KurintoBookAux-Rg.ttf);
+  font-display: fallback;
+}
+
+
+@font-face {
+  font-family: 'NotoSansOldSouthArabian-Regular';
+  src: url(../fonts/NotoSansOldSouthArabian-Regular.ttf);
+  font-display: fallback;
+}
+
+
+
+@font-face {
+  font-family: 'Quivira';
+  src: url(../fonts/Quivira.otf);
+  font-display: fallback;
+}
+
+
+@font-face {
+  font-family: 'NotoSansArmenian-Regular';
+  src: url(../fonts/NotoSansArmenian-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'ahuramazda';
+  src: url(../fonts/ahuramazda.ttf);
+  font-display: fallback;
+}
+
+
+
+
+@font-face {
+  font-family: 'AksaraBali';
+  src: url(../fonts/AksaraBali.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansBalinese-Regular';
+  src: url(../fonts/NotoSansBalinese-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansBamum-Regular';
+  src: url(../fonts/NotoSansBamum-Regular.ttf);
+  font-display: fallback;
+}
+
+
+
+@font-face {
+  font-family: 'NotoSansTagalog-Regular';
+  src: url(../fonts/NotoSansTagalog-Regular.ttf);font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansBuhid-Regular';
+  src: url(../fonts/NotoSansBuhid-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansCanadianAboriginal-Regular';
+  src: url(../fonts/NotoSansCanadianAboriginal-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansCham-Regular';
+  src: url(../fonts/NotoSansCham-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansCherokee-Regular';
+  src: url(../fonts/NotoSansCherokee-Regular.ttf);font-display: fallback;
+}
+
+@font-face {
+  font-family: 'BabelStoneHan';
+  src: url(../fonts/BabelStoneHan.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansEgyptianHieroglyphs-Regular';
+  src: url(../fonts/NotoSansEgyptianHieroglyphs-Regular.ttf);
+  font-display: fallback;
+}
+
+
+
+@font-face {
+  font-family: 'NotoSansElbasan-Regular';
+  src: url(../fonts/NotoSansElbasan-Regular.ttf);
+  font-display: fallback;
+}
+
+
+@font-face {
+  font-family: 'NotoSansEthiopic-Regular';
+  src: url(../fonts/NotoSansEthiopic-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Skeirs';
+  src: url(../fonts/SkeirsII.ttf);
+  font-display: fallback;
+}
+
+
+@font-face {
+  font-family: 'NotoSansJavanese-Regular';
+  src: url(../fonts/NotoSansJavanese-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansKaithi-Regular';
+  src: url(../fonts/NotoSansKaithi-Regular.ttf);
+  font-display: fallback;
+}
+@font-face {
+  font-family: 'KurintoBookCore-Rg';
+  src: url(../fonts/KurintoBookCore-Rg.ttf);
+  font-display: fallback;
+}
+@font-face {
+  font-family: 'Mingzat-Regular';
+  src: url(../fonts/Mingzat-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansLepcha-Regular';
+  src: url(../fonts/NotoSansLepcha-Regular.ttf);
+  font-display: fallback;
+}
+
+
+@font-face {
+  font-family: 'NotoSansLimbu-Regular';
+  src: url(../fonts/NotoSansLimbu-Regular.ttf);
+  font-display: fallback;
+}
+
+
+@font-face {
+  font-family: 'NotoSansLinearA-Regular';
+  src: url(../fonts/NotoSansLinearA-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansLinearB-Regular';
+  src: url(../fonts/NotoSansLinearB-Regular.ttf);
+  font-display: fallback;
+}
+
+
+@font-face {
+  font-family: 'NotoSansBuginese-Regular';
+  src: url(../fonts/NotoSansBuginese-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansMandaic-Regular';
+  src: url(../fonts/NotoSansMandaic-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'MongolianUniversalWhite';
+  src: url(../fonts/MongolianUniversalWhite.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'BabelStoneMarchen.ttf';
+  src: url(../fonts/BabelStoneMarchen.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansNewTaiLue-Regular';
+  src: url(../fonts/NotoSansNewTaiLue-Regular.ttf);
+  font-display: fallback;
+}
+
+@font-face {
+  font-family: 'BabelStoneOghamR';
+  src: url(../fonts/BabelStoneOghamR.ttf);
+}
+
+@font-face {
+  font-family: 'ALPHA-Test';
+  src: url(../fonts/ALPHA-Test.otf);   font-display: fallback; }
+
+
+@font-face {
+  font-family: 'NotoSansOldPersian-Regular';
+  src: url(../fonts/NotoSansOldPersian-Regular.ttf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansPahawhHmong-Regular_190423';
+  src: url(../fonts/NotoSansPahawhHmong-Regular_190423.ttf);   font-display: fallback;
+}
+@font-face {
+  font-family: 'NotoSansOsage-Regular';
+  src: url(../fonts/NotoSansOsage-Regular.ttf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansSymbols2-Regular';
+  src: url(../fonts/NotoSansSymbols2-Regular.ttf);   font-display: fallback;
+}
+@font-face {
+  font-family: 'NotoSansRunic-Regular';
+  src: url(../fonts/NotoSansRunic-Regular.ttf);   font-display: fallback;
+}
+@font-face {
+  font-family: 'ApDevaSiddhamEx';
+  src: url(../fonts/ApDevaSiddhamEx.ttf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansSundanese-Regular';
+  src: url(../fonts/NotoSansSundanese-Regular.ttf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSansSyriacEastern-Regular';
+  src: url(../fonts/NotoSansSyriacEastern-Regular.ttf);   font-display: fallback;
+}
+
+@font-face {
+  font-family:'NotoSansSylotiNagri-Regular';
+  src: url(../fonts/NotoSansSylotiNagri-Regular.ttf);   font-display: fallback;
+}
+
+@font-face {
+  font-family:'NotoSansTaiLe-Regular';
+  src: url(../fonts/NotoSansTaiLe-Regular.ttf);   font-display: fallback;
+}
+
+@font-face {
+  font-family:'NotoSansTifinagh-Regular';
+  src: url(../fonts/NotoSansTifinagh-Regular.ttf);   font-display: fallback;
+}
+@font-face {
+  font-family: 'NotoSansYi-Regular';
+  src: url(../fonts/NotoSansYi-Regular.ttf);   font-display: fallback;
+}
+@font-face {
+  font-family:'NotoSans-Condensed';
+  src: url(../fonts/NotoSans-Condensed.ttf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'NotoSerif-Regular';
+  src: url(../fonts/NotoSerif-Regular.ttf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Aegean';
+  src: url(../fonts/Aegean.otf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'CyproMinoan';
+  src: url(../fonts/CyproMinoan.otf);   font-display: fallback;
+}
+
+
+@font-face {
+  font-family: 'CretanHieroglyphs';
+  src: url(../fonts/CretanHieroglyphs.otf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Symbola';
+  src: url(../fonts/Symbola.otf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Alexander';
+  src: url(../fonts/Alexander.otf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Aegyptus';
+  src: url(../fonts/Aegyptus.otf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'EEMusic';
+  src: url(../fonts/EEMusic.otf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Assyrian';
+  src: url(../fonts/Assyrian.otf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Akkadian';
+  src: url(../fonts/Akkadian.otf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Unidings';
+  src: url(../fonts/Unidings.otf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Maya';
+  src: url(../fonts/Maya.otf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'SignWriting 2010';
+  src: url(../fonts/SignWriting2010.ttf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Unifont Upper';
+  src: url(../fonts/unifont_upper.ttf);   font-display: fallback;
+}
+
+@font-face {
+  font-family: 'Sourcehan';
+  src: url(../fonts/SourceHanSerifSC-Medium.otf);   font-display: fallback;
+}
+
+#container {
+	width: 100%;
+	height: 100%;
+	margin: 0 auto;
+}
+
+#content {
+	margin: 7px;
+
+	width: 100%;
+	font-size:2.2vmax;
+	font-family: 'Apercu', monospace;
+align-content: center;
+ line-height: 115%;
+}
+
+.outputSample {
+		margin: 20px;
+	padding: 5px;
+}
+
+#content {
+	margin: 15px;
+	width: 100%;
+	font-size:2.2vmax;
+	font-family: 'Apercu', monospace;
+align-content: center;
+}
+
+#output {
+	margin: 10px;
+	padding: 5px;
+	font-size:3.2vmax;
+	font-family: 'NotoSans-Condensed', 'gnu', 'SignWriting 2010','Unifont Upper', 'NotoSerif-Regular', 'himalaya', 'NotoSansBrahmi-Regular', 'penuture', 'NotoSansAdlam-Regular', 'Everson', 'KurintoBook-Rg', 'KurintoBookAux-Rg', 'NotoSansOldSouthArabian-Regular', 'Quivira', 'NotoSansArmenian-Regular', 'ahuramazda', 'NotoSansBalinese-Regular', 'NotoSansBamum-Regular', 'NotoSansTagalog-Regular', 'NotoSansBuhid-Regular', 'NotoSansCanadianAboriginal-Regular', 'Sourcehan', 'NotoSansCham-Regular', 'NotoSansCherokee-Regular', 'BabelStoneHan', 'NotoSansElbasan-Regular', 'NotoSansEgyptianHieroglyphs-Regular', 'NotoSansEthiopic-Regular', 'Skeirs', 'NotoSansJavanese-Regular', 'NotoSansKaithi-Regular', 'KurintoBookCore-Rg', 'NotoSansLepcha-Regular', 'Mingzat-Regular', 'NotoSansLimbu-Regular', 'NotoSansLinearA-Regular', 'NotoSansLinearB-Regular', 'NotoSansBuginese-Regular', 'NotoSansMandaic-Regular', 'BabelStoneMarchen', 'MongolianUniversalWhite', 'NotoSansNewTaiLue-Regular', 'ALPHA-Test', 'NotoSansOldPersian-Regular', 'NotoSansOsage-Regular', 'NotoSansPahawhHmong-Regular_190423', 'NotoSansSymbols2-Regular.ttf', 'NotoSansRunic-Regular', 'ApDevaSiddhamEx', 'NotoSansSundanese-Regular', 'NotoSansSylotiNagri-Regular', 'NotoSansSyriacEastern-Regular', 'NotoSansTaiLe-Regular', 'NotoSansTifinagh-Regular', 'NotoSansYi-Regular', 'Aegean', 'Alexander', 'Symbola', 'CretanHieroglyphs', 'CyproMinoan', 'EEMusic','Assyrian', 'Akkadian', 'Maya' ;
+  line-height: 140%;
+
+}
+
+#grammar {
+		padding: 5px;
+	margin: 10px;
+}
