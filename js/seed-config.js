@@ -1,5 +1,7 @@
-// Aquí pones tu semilla deseada:
-localStorage.setItem('pixelSequencerSeed','600087110'); // <-- tu semilla
+// Semilla aleatoria en cada carga
+// Para fijar una semilla específica, reemplaza la línea de abajo con:
+//   localStorage.setItem('pixelSequencerSeed', '600087110');
+localStorage.setItem('pixelSequencerSeed', Math.floor(Math.random() * 999999999999));
 
 
 

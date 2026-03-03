@@ -631,12 +631,11 @@ const fluidColorGenerator = new RecursiveColorGenerator();
                     }
                     break;
                     
-                case CollisionBehaviors.MERGE:
-                    // Crear una nueva partícula en el punto medio
+                case CollisionBehaviors.MERGE: {
                     const newParticle = new SequencedTextParticle({
                         x: (particle1.x + particle2.x) / 2,
                         y: (particle1.y + particle2.y) / 2,
-                        width: (particle1.width + particle2.width) / 2,
+                        width:  (particle1.width  + particle2.width)  / 2,
                         height: (particle1.height + particle2.height) / 2,
                         direction: {
                             x: (particle1.direction.x + particle2.direction.x) / 2,
@@ -646,7 +645,7 @@ const fluidColorGenerator = new RecursiveColorGenerator();
                             x: (particle1.arc.x + particle2.arc.x) / 2,
                             y: (particle1.arc.y + particle2.arc.y) / 2
                         },
-                        speed: (particle1.speed + particle2.speed) / 2,
+                        speed:       (particle1.speed       + particle2.speed)       / 2,
                         maxDistance: (particle1.maxDistance + particle2.maxDistance) / 2,
                         colorShift: {
                             r: (particle1.colorShift.r + particle2.colorShift.r) / 2,
@@ -654,14 +653,11 @@ const fluidColorGenerator = new RecursiveColorGenerator();
                             b: (particle1.colorShift.b + particle2.colorShift.b) / 2
                         }
                     });
-                    
-                    // Marcar ambas partículas originales para eliminación
                     particle1.toDelete = true;
                     particle2.toDelete = true;
-                    
-                    // Agregar la nueva partícula
                     particles.push(newParticle);
                     break;
+                }
                     
                 case CollisionBehaviors.DESTROY_BOTH:
                     // Ambas partículas se destruyen
@@ -694,18 +690,17 @@ const fluidColorGenerator = new RecursiveColorGenerator();
                     }
                     break;
                     
-                case CollisionBehaviors.REPEL:
-                    // Se repelen mutuamente
+                case CollisionBehaviors.REPEL: {
                     const repelForce = 1;
                     const dx = particle2.x - particle1.x;
                     const dy = particle2.y - particle1.y;
                     const distance = Math.sqrt(dx * dx + dy * dy) || 1;
-                    
                     particle1.direction.x -= (dx / distance) * repelForce;
                     particle1.direction.y -= (dy / distance) * repelForce;
                     particle2.direction.x += (dx / distance) * repelForce;
                     particle2.direction.y += (dy / distance) * repelForce;
                     break;
+                }
                     
                 case CollisionBehaviors.PHASE_THROUGH:
                     // Una partícula "pasa a través" de la otra sin afectarse
@@ -940,57 +935,56 @@ chooseSizeChangeType() {
 updateSize() {
     switch (this.sizeChangeType) {
         case 'stable':
-            // No cambiar tamaño
             break;
-            
-        case 'pulse':
+        case 'pulse': {
             const pulseMultiplier = 1 + Math.sin(this.age * this.sizeChangeSpeed * 0.1) * this.sizeChangeIntensity;
-            this.width = this.originalWidth * pulseMultiplier;
+            this.width  = this.originalWidth  * pulseMultiplier;
             this.height = this.originalHeight * pulseMultiplier;
             break;
-            
-        case 'grow':
+        }
+        case 'grow': {
             const growthRate = 1 + (this.age * 0.001 * this.sizeChangeSpeed);
-            this.width = Math.min(this.originalWidth * growthRate, this.originalWidth * 2);
+            this.width  = Math.min(this.originalWidth  * growthRate, this.originalWidth  * 2);
             this.height = Math.min(this.originalHeight * growthRate, this.originalHeight * 2);
             break;
-            
-        case 'shrink':
+        }
+        case 'shrink': {
             const shrinkRate = Math.max(0.3, 1 - (this.age * 0.001 * this.sizeChangeSpeed));
-            this.width = this.originalWidth * shrinkRate;
+            this.width  = this.originalWidth  * shrinkRate;
             this.height = this.originalHeight * shrinkRate;
             break;
-            
-        case 'oscillate':
+        }
+        case 'oscillate': {
             const oscillateX = 1 + Math.sin(this.age * this.sizeChangeSpeed * 0.08) * this.sizeChangeIntensity;
             const oscillateY = 1 + Math.cos(this.age * this.sizeChangeSpeed * 0.12) * this.sizeChangeIntensity;
-            this.width = this.originalWidth * oscillateX;
+            this.width  = this.originalWidth  * oscillateX;
             this.height = this.originalHeight * oscillateY;
             break;
-            
-        case 'random_jump':
-            if (Math.random() > 0.98) { // 2% probabilidad de salto
+        }
+        case 'random_jump': {
+            if (Math.random() > 0.98) {
                 const jumpX = 0.5 + Math.random() * 1.5;
                 const jumpY = 0.5 + Math.random() * 1.5;
-                this.width = this.originalWidth * jumpX;
+                this.width  = this.originalWidth  * jumpX;
                 this.height = this.originalHeight * jumpY;
             }
             break;
-            
-        case 'wave':
+        }
+        case 'wave': {
             const waveX = 1 + Math.sin(this.age * 0.05 + this.x * 0.01) * this.sizeChangeIntensity;
             const waveY = 1 + Math.cos(this.age * 0.07 + this.y * 0.01) * this.sizeChangeIntensity;
-            this.width = this.originalWidth * waveX;
+            this.width  = this.originalWidth  * waveX;
             this.height = this.originalHeight * waveY;
             break;
-            
-        case 'spiral':
-            const spiralAngle = this.age * 0.02;
+        }
+        case 'spiral': {
+            const spiralAngle  = this.age * 0.02;
             const spiralRadius = 1 + Math.sin(spiralAngle) * this.sizeChangeIntensity;
-            const spiralX = 1 + Math.cos(spiralAngle * 1.3) * this.sizeChangeIntensity * 0.5;
-            this.width = this.originalWidth * spiralRadius * spiralX;
+            const spiralX      = 1 + Math.cos(spiralAngle * 1.3) * this.sizeChangeIntensity * 0.5;
+            this.width  = this.originalWidth  * spiralRadius * spiralX;
             this.height = this.originalHeight * spiralRadius;
             break;
+        }
     }
     
     // Asegurar límites mínimos y máximos
