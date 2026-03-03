@@ -454,7 +454,7 @@ const fluidColorGenerator = new RecursiveColorGenerator();
         // ─── Sistema de reveal progresivo ("agua al río") ───────────────
         let textRevealQueue = [];
         let lastRevealTime  = 0;
-        const REVEAL_INTERVAL_MS = 90; // ~11 palabras/segundo
+        const REVEAL_INTERVAL_MS = 35; // ~28 ticks/segundo
 
         // Construye la cola de palabras para reveal: múltiples instancias
         // del bot con distintos tamaños y posiciones mezcladas.
@@ -475,6 +475,8 @@ const fluidColorGenerator = new RecursiveColorGenerator();
                     let text = window.currentGrammar
                         ? window.currentGrammar.flatten('#origin#')
                         : (generatedTexts[Math.floor(Math.random() * generatedTexts.length)] || '');
+                    // Convertir <br> en espacios y eliminar cualquier otro tag HTML
+                    text = text.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
                     if (!text) return;
 
                     const fontSize   = Math.round(cluster.minSize + Math.random() * (cluster.maxSize - cluster.minSize));
@@ -765,15 +767,24 @@ const fluidColorGenerator = new RecursiveColorGenerator();
                     let data = imageData.data;
                     
                     for (let i = 0; i < data.length; i += 4) {
-                        if (Math.random() > 0.9) {
-                            data[i] = Math.min(255, Math.max(0, data[i] + this.colorShift.r));
-                            data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + this.colorShift.g));
-                            data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + this.colorShift.b));
-                            
-                            if (Math.random() > 0.9) {
-                                data[i] = random(255);
-                                data[i + 1] = random(255);
-                                data[i + 2] = random(255);
+                        const isNearBlack = data[i] < 15 && data[i+1] < 15 && data[i+2] < 15;
+
+                        if (isNearBlack) {
+                            // Distorsionar zonas negras/ausentes con el colorShift en valor absoluto
+                            if (Math.random() > 0.75) {
+                                data[i]   = Math.min(255, Math.abs(this.colorShift.r) + Math.random() * 40);
+                                data[i+1] = Math.min(255, Math.abs(this.colorShift.g) + Math.random() * 40);
+                                data[i+2] = Math.min(255, Math.abs(this.colorShift.b) + Math.random() * 40);
+                            }
+                        } else if (Math.random() > 0.82) {
+                            data[i]   = Math.min(255, Math.max(0, data[i]   + this.colorShift.r));
+                            data[i+1] = Math.min(255, Math.max(0, data[i+1] + this.colorShift.g));
+                            data[i+2] = Math.min(255, Math.max(0, data[i+2] + this.colorShift.b));
+
+                            if (Math.random() > 0.92) {
+                                data[i]   = random(255);
+                                data[i+1] = random(255);
+                                data[i+2] = random(255);
                             }
                         }
                     }
@@ -1451,85 +1462,93 @@ generateIrregularVertices() {
         
         switch (this.geometryType) {
             case 'trapezoid':
-                // Efecto de perspectiva
+                // Efecto de perspectiva — afecta también negros
                 for (let i = 0; i < data.length; i += 4) {
-                    if (Math.random() > 0.85) {
-                        const shift = Math.sin(this.age * 0.02) * 20;
-                        data[i] = Math.min(255, Math.max(0, data[i] + shift));
-                        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] - shift/2));
-                        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + shift/3));
+                    const nb = data[i] < 15 && data[i+1] < 15 && data[i+2] < 15;
+                    if (nb ? Math.random() > 0.6 : Math.random() > 0.55) {
+                        const shift = Math.sin(this.age * 0.02) * 40;
+                        data[i]   = Math.min(255, Math.max(0, data[i]   + shift));
+                        data[i+1] = Math.min(255, Math.max(0, data[i+1] - shift * 0.5));
+                        data[i+2] = Math.min(255, Math.max(0, data[i+2] + shift * 0.4));
                     }
                 }
                 break;
-                
+
             case 'parallelogram':
                 // Efecto de deformación lateral
                 for (let i = 0; i < data.length; i += 4) {
-                    if (Math.random() > 0.88) {
-                        const skew = Math.cos(this.age * 0.03) * 15;
-                        data[i] = Math.min(255, Math.max(0, data[i] + skew));
-                        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + skew));
+                    const nb = data[i] < 15 && data[i+1] < 15 && data[i+2] < 15;
+                    if (nb ? Math.random() > 0.6 : Math.random() > 0.55) {
+                        const skew = Math.cos(this.age * 0.03) * 35;
+                        data[i]   = Math.min(255, Math.max(0, data[i]   + skew));
+                        data[i+1] = Math.min(255, Math.max(0, data[i+1] + skew * 0.6));
+                        data[i+2] = Math.min(255, Math.max(0, data[i+2] - skew * 0.3));
                     }
                 }
                 break;
-                
+
             case 'rhombus':
                 // Efecto de rotación cromática
                 for (let i = 0; i < data.length; i += 4) {
-                    if (Math.random() > 0.9) {
-                        const angle = this.age * 0.01;
-                        const r = data[i];
-                        const g = data[i + 1];
-                        const b = data[i + 2];
-                        
-                        data[i] = Math.min(255, Math.max(0, r * Math.cos(angle) - g * Math.sin(angle)));
-                        data[i + 1] = Math.min(255, Math.max(0, r * Math.sin(angle) + g * Math.cos(angle)));
-                        data[i + 2] = Math.min(255, Math.max(0, b + Math.sin(angle) * 10));
+                    const nb = data[i] < 15 && data[i+1] < 15 && data[i+2] < 15;
+                    if (nb ? Math.random() > 0.55 : Math.random() > 0.6) {
+                        const angle = this.age * 0.015;
+                        const r = nb ? 30 + Math.random() * 60 : data[i];
+                        const g = nb ? 10 + Math.random() * 40 : data[i+1];
+                        const b = nb ? 20 + Math.random() * 50 : data[i+2];
+                        data[i]   = Math.min(255, Math.max(0, r * Math.cos(angle) - g * Math.sin(angle)));
+                        data[i+1] = Math.min(255, Math.max(0, r * Math.sin(angle) + g * Math.cos(angle)));
+                        data[i+2] = Math.min(255, Math.max(0, b + Math.sin(angle) * 25));
                     }
                 }
                 break;
-                
+
             case 'irregular':
                 // Efecto caótico
                 for (let i = 0; i < data.length; i += 4) {
-                    if (Math.random() > 0.82) {
-                        const chaos = (Math.random() - 0.5) * 40;
-                        data[i] = Math.min(255, Math.max(0, data[i] + chaos));
-                        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + chaos * 0.7));
-                        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + chaos * 1.3));
+                    const nb = data[i] < 15 && data[i+1] < 15 && data[i+2] < 15;
+                    if (nb ? Math.random() > 0.5 : Math.random() > 0.55) {
+                        const chaos = (Math.random() - 0.5) * 80;
+                        data[i]   = Math.min(255, Math.max(0, data[i]   + chaos));
+                        data[i+1] = Math.min(255, Math.max(0, data[i+1] + chaos * 0.7));
+                        data[i+2] = Math.min(255, Math.max(0, data[i+2] + chaos * 1.3));
                     }
                 }
                 break;
-                
+
             case 'triangle':
                 // Efecto angular
                 for (let i = 0; i < data.length; i += 4) {
-                    if (Math.random() > 0.87) {
-                        const wave = Math.sin(this.age * 0.04 + i * 0.001) * 25;
-                        data[i] = Math.min(255, Math.max(0, data[i] + wave));
-                        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] - wave));
+                    const nb = data[i] < 15 && data[i+1] < 15 && data[i+2] < 15;
+                    if (nb ? Math.random() > 0.58 : Math.random() > 0.6) {
+                        const wave = Math.sin(this.age * 0.04 + i * 0.001) * 50;
+                        data[i]   = Math.min(255, Math.max(0, data[i]   + wave));
+                        data[i+2] = Math.min(255, Math.max(0, data[i+2] - wave * 0.6));
                     }
                 }
                 break;
-                
+
             case 'pentagon':
                 // Efecto pentagonal
                 for (let i = 0; i < data.length; i += 4) {
-                    if (Math.random() > 0.86) {
-                        const penta = Math.sin(this.age * 0.05 * 5) * 20; // Frecuencia x5 para el pentágono
-                        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + penta));
-                        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + penta * 0.5));
+                    const nb = data[i] < 15 && data[i+1] < 15 && data[i+2] < 15;
+                    if (nb ? Math.random() > 0.58 : Math.random() > 0.6) {
+                        const penta = Math.sin(this.age * 0.05 * 5) * 45;
+                        data[i+1] = Math.min(255, Math.max(0, data[i+1] + penta));
+                        data[i+2] = Math.min(255, Math.max(0, data[i+2] + penta * 0.6));
+                        if (nb) data[i] = Math.min(255, Math.abs(penta) * 0.4);
                     }
                 }
                 break;
-                
+
             default: // rectangle
                 // Efecto estándar
                 for (let i = 0; i < data.length; i += 4) {
-                    if (Math.random() > 0.9) {
-                        data[i] = Math.min(255, Math.max(0, data[i] + (Math.random() - 0.5) * 20));
-                        data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + (Math.random() - 0.5) * 20));
-                        data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + (Math.random() - 0.5) * 20));
+                    const nb = data[i] < 15 && data[i+1] < 15 && data[i+2] < 15;
+                    if (nb ? Math.random() > 0.65 : Math.random() > 0.7) {
+                        data[i]   = Math.min(255, Math.max(0, data[i]   + (Math.random() - 0.5) * 50));
+                        data[i+1] = Math.min(255, Math.max(0, data[i+1] + (Math.random() - 0.5) * 50));
+                        data[i+2] = Math.min(255, Math.max(0, data[i+2] + (Math.random() - 0.5) * 50));
                     }
                 }
                 break;
@@ -1537,7 +1556,6 @@ generateIrregularVertices() {
     }
 }        // Función para procesar todas las colisiones
         function processCollisions() {
-            setSeed(seed);
             const activeParticles = particles.filter(p => !p.toDelete && !p.done);
             
             for (let i = 0; i < activeParticles.length; i++) {
@@ -1584,14 +1602,14 @@ generateIrregularVertices() {
                 }
             });
             if (Math.random() > 0.85) {
-                const count = random(4) + 3;
+                const count = random(6) + 4;
                 for (let i = 0; i < count; i++) {
                     distortions.push(new SequencedPixelDistortion({
                         x: random(canvas.width),
                         y: random(canvas.height),
-                        width:  random(80) + 30,
-                        height: random(80) + 30,
-                        change: { x: (random(3) - 1) * 0.4, y: (random(3) - 1) * 0.4 }
+                        width:  random(100) + 30,
+                        height: random(100) + 30,
+                        change: { x: (random(3) - 1) * 2.5, y: (random(3) - 1) * 2.5 }
                     }));
                 }
             }
@@ -1641,8 +1659,8 @@ generateIrregularVertices() {
                 width: random(150) + 50,
                 height: random(150) + 50,
                 change: {
-                    x: (random(3) - 1) * 1,
-                    y: (random(3) - 1) * 1
+                    x: (random(3) - 1) * 2.5,
+                    y: (random(3) - 1) * 2.5
                 }
             });
             
@@ -1696,8 +1714,8 @@ generateIrregularVertices() {
             width: random(120) + 40,
             height: random(120) + 40,
             change: {
-                x: (random(3) - 1) * 1.2,
-                y: (random(3) - 1) * 1.2
+                x: (random(3) - 1) * 3,
+                y: (random(3) - 1) * 3
             }
         });
         
@@ -1723,7 +1741,6 @@ generateIrregularVertices() {
 
         // Loop de animación principal
         function animate() {
-            setSeed(seed);
             if (!canvasAnimationStarted) return;
 
             requestAnimationFrame(animate);
@@ -1733,9 +1750,10 @@ generateIrregularVertices() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.005)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // ── Revelar la siguiente palabra de la cola ──
+            // ── Revelar varias palabras por tick ──
             if (Date.now() - lastRevealTime > REVEAL_INTERVAL_MS) {
-                revealNextWord();
+                const burst = 2 + Math.floor(Math.random() * 3); // 2-4 palabras por tick
+                for (let w = 0; w < burst; w++) revealNextWord();
                 lastRevealTime = Date.now();
             }
 
@@ -1774,13 +1792,13 @@ generateIrregularVertices() {
             }
 
             // Nueva distorsión esporádica
-            if (Math.random() > 0.995) {
+            if (Math.random() > 0.992) {
                 distortions.push(new SequencedPixelDistortion({
                     x: random(canvas.width),
                     y: random(canvas.height),
                     width: random(190) + 40,
                     height: random(190) + 40,
-                    change: { x: (random(3) - 1) * 1.5, y: (random(3) - 1) * 1.5 }
+                    change: { x: (random(3) - 1) * 3.5, y: (random(3) - 1) * 3.5 }
                 }));
             }
 
